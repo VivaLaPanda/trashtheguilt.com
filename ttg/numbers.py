@@ -269,7 +269,7 @@ def check_copy() -> list[str]:
         ("K1 high", c.plastic_year.high, 250, 5),
         ("K1 pct low", c.footprint_pct.low, 0.7, 0.05),
         ("K1 pct high", c.footprint_pct.high, 1.3, 0.05),
-        ("C3 3 to 1", c.dog_to_plastic, 3, 0.2),
+        ("C3 3x", c.dog_to_plastic, 3, 0.2),
         ("K4 cheese", c.cheese_year, 435, 3),
         ("K4 flight", c.flight_round_trip, 1_195, 5),
         ("K7b gal low", c.gallons.low, 15, 0.6),
@@ -278,6 +278,7 @@ def check_copy() -> list[str]:
         ("R6 lb per can", b.per_can_kg / KG_PER_LB, 0.3, 0.02),
         ("R5 cans", c.plastic_year.high / b.per_can_kg, 1_900, 60),
         ("R3 three quarters", b.landfill_share, 0.75, 0.02),
+        ("R punch 76%", b.landfill_share * 100, 76, 0.5),
     ]
     return [
         f"{name}: computed {got:.4g}, copy says {want:g}"

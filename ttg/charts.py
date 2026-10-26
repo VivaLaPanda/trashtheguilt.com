@@ -1,4 +1,4 @@
-"""Data charts as inline SVG. Grey first, one accent, direct labels, bars from zero."""
+"""Data charts as inline SVG: one muted tone, one accent, direct labels, bars from zero. Width w is the viewBox width."""
 
 from dataclasses import dataclass
 
@@ -24,29 +24,29 @@ def _tip(s: str) -> str:
     return el("title", s)
 
 
-def hbars(rows: list[Row], aria: str, label_w: float = 118, unit: str = "") -> str:
+def hbars(rows: list[Row], aria: str, label_w: float = 118, unit: str = "", w: float = W) -> str:
     """Horizontal bars with the value at each tip; rows drawn in the given order."""
-    row_h, bar_t, top = 26, 14, 4
+    row_h, bar_t, top = 28, 16, 4
     x0 = label_w
-    x1 = W - 52
+    x1 = w - 52
     vmax = max(rw.high for rw in rows)
     h = top + row_h * len(rows) + 4
     parts = [line(x0, 0, x0, h - 4, "base")]
     for i, rw in enumerate(rows):
         y = top + i * row_h + (row_h - bar_t) / 2
-        w = (x1 - x0) * rw.high / vmax
+        bw = (x1 - x0) * rw.high / vmax
         cls = "f-accent" if rw.accent else "f-grey"
         label_cls = "t t-strong" if rw.accent else "t"
         parts.append(text(x0 - 8, y + bar_t - 3, rw.label, label_cls, anchor="end"))
-        g = bar_h(x0, y, max(w, 1.5), bar_t, cls) + text(x0 + w + 6, y + bar_t - 3, rw.value_label, f"{label_cls} t-num")
-        parts.append(el("g", _tip(f"{rw.label}: {rw.value_label}{unit}") + g + rect(0, y - 5, W, bar_t + 10, "hit")))
-    return svg(W, h, "".join(parts), aria)
+        g = bar_h(x0, y, max(bw, 1.5), bar_t, cls) + text(x0 + bw + 6, y + bar_t - 3, rw.value_label, f"{label_cls} t-num")
+        parts.append(el("g", _tip(f"{rw.label}: {rw.value_label}{unit}") + g + rect(0, y - 5, w, bar_t + 10, "hit")))
+    return svg(w, h, "".join(parts), aria)
 
 
-def ranges(rows: list[Row], aria: str, ticks: list[float], tick_fmt: str = "{:,.0f}", label_w: float = 132) -> str:
+def ranges(rows: list[Row], aria: str, ticks: list[float], tick_fmt: str = "{:,.0f}", label_w: float = 132, w: float = W) -> str:
     """Point values as bars from zero; ranges as a whisker with a dot at each end."""
     row_h, bar_t, top = 34, 14, 6
-    x0, x1 = label_w, W - 70
+    x0, x1 = label_w, w - 70
     vmax = ticks[-1]
     sx = lambda v: x0 + (x1 - x0) * v / vmax
     plot_h = top + row_h * len(rows)
@@ -71,8 +71,8 @@ def ranges(rows: list[Row], aria: str, ticks: list[float], tick_fmt: str = "{:,.
             mark = bar_h(x0, cy - bar_t / 2, sx(rw.high) - x0, bar_t, "f-accent" if rw.accent else "f-grey")
             end = sx(rw.high) + 6
         lab = text(end, cy + 4, rw.value_label, f"{label_cls} t-num")
-        parts.append(el("g", _tip(f"{rw.label}: {rw.value_label}") + mark + lab + rect(0, cy - row_h / 2, W, row_h, "hit")))
-    return svg(W, plot_h + 24, "".join(parts), aria)
+        parts.append(el("g", _tip(f"{rw.label}: {rw.value_label}") + mark + lab + rect(0, cy - row_h / 2, w, row_h, "hit")))
+    return svg(w, plot_h + 24, "".join(parts), aria)
 
 
 @dataclass(frozen=True)
@@ -83,16 +83,16 @@ class Step:
     kind: str  # "up", "credit", "total"
 
 
-def waterfall(steps: list[Step], aria: str, ymax: float, ticks: list[float]) -> str:
+def waterfall(steps: list[Step], aria: str, ymax: float, ticks: list[float], w: float = W) -> str:
     """Waterfall: increases, a credit, and the net total from zero."""
     top, base = 22, 200
     x0 = 34
     col_w = 30
-    slot = (W - x0) / len(steps)
+    slot = (w - x0) / len(steps)
     sy = lambda v: base - (base - top) * v / ymax
     parts: list[str] = []
     for t in ticks:
-        parts.append(line(x0, sy(t), W, sy(t), "grid" if t else "base"))
+        parts.append(line(x0, sy(t), w, sy(t), "grid" if t else "base"))
         parts.append(text(x0 - 6, sy(t) + 4, f"{t:g}", "t t-muted t-num", anchor="end"))
     run = 0.0
     prev_end: tuple[float, float] | None = None
@@ -125,7 +125,7 @@ def waterfall(steps: list[Step], aria: str, ymax: float, ticks: list[float]) -> 
             )
         )
         prev_end = (x + col_w, hi if st.kind != "credit" else lo)
-    return svg(W, base + 28, "".join(parts), aria)
+    return svg(w, base + 28, "".join(parts), aria)
 
 
 @dataclass(frozen=True)
@@ -136,15 +136,15 @@ class Flow:
     accent: bool = False
 
 
-def sankey(total_label: str, flows: list[Flow], aria: str) -> str:
+def sankey(total_label: str, flows: list[Flow], aria: str, w: float = W) -> str:
     """One source splitting into flows, widths to scale; the accent flow carries the point."""
     top, height = 10, 210
     gap = 8
     total = sum(f.value for f in flows)
     k = (height - gap * (len(flows) - 1)) / total
     src_x, src_w = 6, 14
-    dst_x, dst_w = 214, 14
-    parts = [rect(src_x, top, src_w, total * k + gap * (len(flows) - 1), "f-grey2")]
+    dst_x, dst_w = w * 0.535, 14
+    parts = [rect(src_x, top, src_w, total * k + gap * (len(flows) - 1), "f-ink")]
 
     sy = top
     dy = top
@@ -176,4 +176,4 @@ def sankey(total_label: str, flows: list[Flow], aria: str) -> str:
         dy += h + gap
     parts.append(text(src_x, max(top + height, last_label + 14) + 18, total_label, "t t-strong t-num"))
     bottom = max(top + height, last_label + 14)
-    return svg(W, bottom + 26, "".join(parts), aria)
+    return svg(w, bottom + 26, "".join(parts), aria)

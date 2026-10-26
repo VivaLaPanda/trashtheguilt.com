@@ -6,9 +6,17 @@ function reveal(id) {
   if (target.tagName === "DETAILS") target.open = true;
 }
 
+// Open first, then jump, so the browser can scroll to a target that was hidden.
 document.addEventListener("click", (e) => {
   const a = e.target.closest('a[href^="#"]');
-  if (a) reveal(a.getAttribute("href").slice(1));
+  if (!a) return;
+  const id = a.getAttribute("href").slice(1);
+  const target = id && document.getElementById(id);
+  if (!target || !target.closest("details:not([open])")) return;
+  e.preventDefault();
+  reveal(id);
+  if (location.hash === "#" + id) target.scrollIntoView({ block: "center" });
+  else location.hash = id;
 });
 reveal(location.hash.slice(1));
 

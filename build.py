@@ -36,6 +36,7 @@ class Share:
     num: str
     line: str
     fig: str
+    band: str
 
     @property
     def text(self) -> str:
@@ -43,9 +44,9 @@ class Share:
 
 
 SHARES = [
-    Share("26x", "26x", "26x.", "One river in Manila puts 26 times more plastic into the ocean than every US river combined.", "c1"),
-    Share("twin-bed", "Twin bed", "Twin bed.", "Your lifetime of trash, buried, takes up less floor space than a twin bed.", "c2"),
-    Share("3-to-1", "3 to 1", "3 to 1.", "Your dog > your plastic, 3 to 1. You don't sweat the kibble. Don't sweat the bag.", "c3"),
+    Share("26x", "26x", "26x.", "One river in Manila puts 26 times more plastic into the ocean than every US river combined.", "c1", "aqua"),
+    Share("twin-bed", "Twin bed", "Twin bed.", "Your lifetime of trash, buried, takes up less floor space than a twin bed.", "c2", "lime"),
+    Share("3x", "3x", "3x.", "Your dog has 3 times the climate footprint of your plastic. You don't sweat the kibble. Don't sweat the bag.", "c3", "sun"),
 ]
 
 
@@ -65,17 +66,16 @@ def fingerprint(src: Path, dest_dir: Path) -> str:
     return f"assets/{name}"
 
 
-def titled(figs: figures.Figures):
-    """Template helper: a chart title plus its SVG, with aria-label set to the title (rule V8)."""
+def labelled(figs: figures.Figures):
+    """Template helper: a figure's SVGs with aria-label set to the chart title (rule V8)."""
 
-    def fig(key: str, title: str) -> Markup:
-        label = escape(title)
-        body, n = re.subn(r'aria-label="[^"]*"', f'aria-label="{label}"', str(figs.figs[key]), count=1)
+    def fig_svg(key: str, title: str) -> Markup:
+        body, n = re.subn(r'aria-label="[^"]*"', f'aria-label="{escape(title)}"', str(figs.figs[key]))
         if not n:
             raise ValueError(f"figure {key} has no aria-label")
-        return Markup(f'<p class="title">{label}</p>{body}')
+        return Markup(body)
 
-    return fig
+    return fig_svg
 
 
 def render_pages(env: Environment, figs: figures.Figures, css: str, js: str) -> None:
@@ -87,25 +87,30 @@ def render_pages(env: Environment, figs: figures.Figures, css: str, js: str) -> 
         out.parent.mkdir(parents=True, exist_ok=True)
         html = tpl.render(
             meta=meta, site=SITE, css=css, js=js, figs=figs.figs, tables=figs.tables,
-            n=Notes(), shares=SHARES, share_icon=SHARE_ICON, fig=titled(figs),
+            n=Notes(), shares=SHARES, share_icon=SHARE_ICON, fig_svg=labelled(figs),
         )
         out.write_text(html)
 
 
 def render_og(env: Environment, figs: figures.Figures) -> None:
-    css = (ROOT / "static/style.css").read_text()
+    # fonts load relative to dist/, so render from a temporary file there
+    css = (ROOT / "static/style.css").read_text().replace('url("/fonts/', 'url("fonts/')
     tpl = env.get_template("og.html.j2")
-    cards = [(s.slug, s.num, s.line, figs.figs[s.fig], 150, 400) for s in SHARES]
-    cards.append(("site", "Garbage in,<br>guilt out.", "", figs.figs["c3"], 92, 380))
+    cards = [(s.slug, s.num, s.line, figs.figs[s.fig], s.band) for s in SHARES]
+    cards.append(("site", "Garbage in,<br>guilt out.", "", figs.figs["c3"], "cream"))
     out_dir = DIST / "og"
     out_dir.mkdir(exist_ok=True)
+    tmp = DIST / "_og.html"
     with sync_playwright() as p:
         browser = p.chromium.launch(executable_path=CHROME)
         page = browser.new_page(viewport={"width": 1200, "height": 630}, color_scheme="light")
-        for slug, num, line, art, num_size, art_w in cards:
-            page.set_content(tpl.render(css=Markup(css), num=num, line=line, art=art, num_size=num_size, art_w=art_w))
+        for slug, num, line, art, band in cards:
+            tmp.write_text(tpl.render(css=Markup(css), num=num, line=line, art=art, band=band))
+            page.goto(tmp.as_uri())
+            page.evaluate("document.fonts.ready")
             page.screenshot(path=str(out_dir / f"{slug}.png"))
         browser.close()
+    tmp.unlink()
 
 
 HEADERS = """/*
@@ -117,6 +122,8 @@ HEADERS = """/*
   Cache-Control: public, max-age=31536000, immutable
 /og/*
   Cache-Control: public, max-age=3600
+/fonts/*
+  Cache-Control: public, max-age=2592000
 """
 
 NOT_FOUND = """<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -143,6 +150,7 @@ def main() -> None:
     css = fingerprint(ROOT / "static/style.css", DIST / "assets")
     js = fingerprint(ROOT / "static/site.js", DIST / "assets")
     shutil.copyfile(ROOT / "static/favicon.svg", DIST / "favicon.svg")
+    shutil.copytree(ROOT / "static/fonts", DIST / "fonts")
 
     env = Environment(
         loader=FileSystemLoader(ROOT / "templates"),
@@ -155,6 +163,7 @@ def main() -> None:
     render_pages(env, figs, css, js)
     (DIST / "404.html").write_text(NOT_FOUND.format(css=css))
     (DIST / "_headers").write_text(HEADERS)
+    (DIST / "_redirects").write_text("/3-to-1/ /3x/ 301\n/3-to-1 /3x/ 301\n")
     (DIST / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE}/sitemap.xml\n")
     (DIST / "sitemap.xml").write_text(
         f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>{SITE}/</loc></url></urlset>\n'

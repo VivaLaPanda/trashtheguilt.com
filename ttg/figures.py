@@ -1,6 +1,7 @@
 """Assemble every figure on the page from the numbers module."""
 
 import csv
+import importlib.util
 import math
 from dataclasses import dataclass
 from html import escape
@@ -8,12 +9,22 @@ from pathlib import Path
 
 from markupsafe import Markup
 
-from ttg import art, art_bed, art_landfill, art_objects
+from ttg import art_bed, art_landfill, art_objects
 from ttg.charts import Flow, Row, Step, hbars, ranges, sankey, waterfall
 from ttg.numbers import BIN, CLIMATE, LANDFILL, OCEAN, Country
-from ttg.svg import el, path, r, rect, svg, text
+from ttg.svg import circle, el, path, r, rect, svg, text
 
 DATA = Path(__file__).resolve().parent.parent / "data"
+WIDE = 720
+
+
+def variants(narrow: str, wide: str) -> str:
+    """Phone and desktop versions of one chart; CSS shows one of them."""
+    return narrow.replace('class="fig"', 'class="fig v-narrow"', 1) + wide.replace('class="fig"', 'class="fig v-wide"', 1)
+
+
+def as_art(svg_markup: str) -> str:
+    return svg_markup.replace('class="fig"', 'class="fig art"', 1)
 
 
 def meijer_countries() -> list[Country]:
@@ -37,8 +48,25 @@ def data_table(head: list[str], rows: list[list[str]]) -> Markup:
 
 
 def card_ocean() -> str:
-    body = art.two_circles(240, OCEAN.pasig_tonnes, OCEAN.us_tonnes, "Pasig River", "All US rivers")
-    return svg(240, 124, body, "Two circles with areas to scale: the Pasig River's plastic is 26 times all US rivers combined")
+    """The Pasig against every US river, circle areas to scale."""
+    o = OCEAN
+    big_r = 128
+    small_r = big_r * (o.us_tonnes / o.pasig_tonnes) ** 0.5
+    base = 284
+    cx, sx = 158, 158 + big_r + 44 + small_r
+    body = "".join(
+        [
+            circle(cx, base - big_r, big_r, "s f-deep"),
+            circle(sx, base - small_r, small_r, "s f-accent"),
+            text(cx, base - big_r - 6, "Pasig River,", "t t-big", anchor="middle"),
+            text(cx, base - big_r + 14, "Manila", "t t-big", anchor="middle"),
+            text(cx, base - big_r + 40, f"{round(o.pasig_tonnes, -3):,.0f} t a year", "t t-strong", anchor="middle"),
+            text(sx, base - 2 * small_r - 30, "Every US", "t t-big", anchor="middle"),
+            text(sx, base - 2 * small_r - 12, "river", "t t-big", anchor="middle"),
+            text(sx, base + 22, f"{round(o.us_tonnes, -2):,.0f} t", "t t-strong", anchor="middle"),
+        ]
+    )
+    return svg(400, base + 30, body, "Two circles with areas to scale: the Pasig River's plastic is 26 times all US rivers combined")
 
 
 def card_landfill() -> str:
@@ -61,7 +89,8 @@ def o3() -> tuple[str, Markup]:
     us = next(c for c in cs if c.name == "United States")
     rows = [Row(c.name, c.share_pct, c.share_pct, _pct(c.share_pct)) for c in top]
     rows.append(Row("United States", us.share_pct, us.share_pct, _pct(us.share_pct), accent=True))
-    chart = hbars(rows, "Share of global river plastic reaching the ocean, by country; the US is 0.25%")
+    aria = "Share of global river plastic reaching the ocean, by country; the US is 0.25%"
+    chart = variants(hbars(rows, aria, label_w=112, w=360), hbars(rows, aria, label_w=140, w=WIDE))
     table = data_table(["Country", "Tonnes a year", "Share"], [[c.name, f"{c.tonnes:,.0f}", _pct(c.share_pct)] for c in [*top, us]])
     return chart, table
 
@@ -105,7 +134,7 @@ def o4() -> str:
     about = round(n, -2)
     kg = f"{o.philippines_kg_per_person:.1f}"
     p.append(text(200, base + 18, f"The Philippines, per person: {kg} kg, about {about} bags", "t t-strong", anchor="middle"))
-    return svg(400, base + 26, "".join(p), f"One 8 g grocery bag; an American's yearly 7 g; and a pile of about {about} bags for the Philippines' {kg} kg per person")
+    return as_art(svg(400, base + 26, "".join(p), f"One 8 g grocery bag; an American's yearly 7 g; and a pile of about {about} bags for the Philippines' {kg} kg per person"))
 
 
 # Landfills
@@ -115,12 +144,12 @@ def l3() -> str:
     lf = LANDFILL
     fp, jp = lf.footprint_sq_ft, lf.japan_footprint_sq_ft
     body, h = art_bed.l3_figure(lf.bed_sq_ft, (fp.low, fp.high), (jp.low, jp.high), lf.doormat_sq_ft)
-    return svg(400, h, body, "A twin bed seen from above with a lifetime of buried trash drawn inside it, and a doormat showing the same trash after incineration")
+    return as_art(svg(400, h, body, "A twin bed seen from above with a lifetime of buried trash drawn inside it, and a doormat showing the same trash after incineration"))
 
 
 def l4() -> str:
     body, h = art_landfill.landfill()
-    return svg(400, h, body, "Modern landfills are sealed, drained and monitored.")
+    return as_art(svg(400, h, body, "Modern landfills are sealed, drained and monitored."))
 
 
 # Climate
@@ -134,7 +163,7 @@ def k3() -> tuple[str, Markup]:
         Step("Energy back", -c.energy_back, f"−{c.energy_back:.2f}", "credit"),
         Step("Net", c.net_burned, f"{c.net_burned:.1f}", "total"),
     ]
-    chart = waterfall(steps, "Kilograms of CO2 per kilogram of plastic burned: make, burn, energy back, net", 6, [0, 1, 2, 3, 4, 5, 6])
+    chart = waterfall(steps, "Kilograms of CO2e per kilogram of plastic burned: make, burn, energy back, net", 6, [0, 1, 2, 3, 4, 5, 6])
     table = data_table(["Step", "kg CO2 per kg"], [[s.label, s.value_label] for s in steps])
     return chart, table
 
@@ -158,7 +187,9 @@ def _r10(v: float) -> int:
 
 def k4() -> tuple[str, Markup]:
     rows = k4_rows()
-    chart = ranges(rows, "Kilograms of CO2 a year: your plastic against cheese, a dog, Tahoe drives and a flight", [0, 400, 800, 1200])
+    aria = "Kilograms of CO2e a year: your plastic against cheese, a dog, Tahoe drives and a flight"
+    ticks = [0, 400, 800, 1200]
+    chart = variants(ranges(rows, aria, ticks, label_w=150, w=380), ranges(rows, aria, ticks, label_w=170, w=WIDE))
     table = data_table(["Item", "kg CO2"], [[rw.label, rw.value_label] for rw in rows])
     return chart, table
 
@@ -166,25 +197,40 @@ def k4() -> tuple[str, Markup]:
 # In the bin
 
 
-def r3() -> str:
+def r3() -> tuple[str, Markup]:
     b = BIN
     flows = [
         Flow("Landfill", b.landfilled_m, f"{b.landfilled_m:.1f}M tons", accent=True),
         Flow("Burned for energy", b.energy_m, f"{b.energy_m:.1f}M tons"),
         Flow("Recycled", b.recycled_m, f"{b.recycled_m:.1f}M tons"),
     ]
-    return sankey(f"{b.plastic_generated_m:.1f}M tons of US plastic, 2018", flows, "Three quarters of US plastic goes to landfill.")
+    total = f"{b.plastic_generated_m:.1f}M tons of US plastic, 2018"
+    aria = "Three quarters of US plastic goes to landfill."
+    chart = sankey(total, flows, aria)
+    table = data_table(["Where US plastic went, 2018", "Million tons"], [[f.label, f"{f.value:.1f}"] for f in flows])
+    return chart, table
 
 
 def r4() -> tuple[str, Markup]:
     rows = [Row(name, v, v, f"{v:.1f}%", accent=name.startswith("PET")) for name, v in BIN.recycled_pct_by_resin]
-    chart = hbars(rows, "Share of each plastic type recycled in the US, 2018; PET is highest at 18.5%", label_w=96)
+    aria = "Share of each plastic type recycled in the US, 2018; PET is highest at 18.5%"
+    chart = variants(hbars(rows, aria, label_w=92, w=360), hbars(rows, aria, label_w=120, w=WIDE))
     table = data_table(["Type", "Recycled, 2018"], [[rw.label, rw.value_label] for rw in rows])
     return chart, table
 
 
 def can() -> str:
     return svg(48, 68, art_objects.can(), "An aluminum can", cls="fig can")
+
+
+def scene() -> str | None:
+    """The knockout scene, once its module exists."""
+    if importlib.util.find_spec("ttg.art_scene") is None:
+        return None
+    from ttg import art_scene  # optional module
+
+    body, w, h = art_scene.scene()
+    return svg(w, h, body, "A sunrise city with wind turbines, solar roofs, new apartments going up and a garbage truck at work")
 
 
 @dataclass(frozen=True)
@@ -198,6 +244,7 @@ def build() -> Figures:
     k3_svg, k3_t = k3()
     k4_svg, k4_t = k4()
     r4_svg, r4_t = r4()
+    r3_svg, r3_t = r3()
     figs = {
         "c1": card_ocean(),
         "c2": card_landfill(),
@@ -208,9 +255,10 @@ def build() -> Figures:
         "l4": l4(),
         "k3": k3_svg,
         "k4": k4_svg,
-        "r3": r3(),
+        "r3": r3_svg,
         "r4": r4_svg,
         "can": can(),
+        "scene": scene(),
     }
-    tables = {"o3": o3_t, "k3": k3_t, "k4": k4_t, "r4": r4_t}
-    return Figures({k: Markup(v) for k, v in figs.items()}, tables)
+    tables = {"o3": o3_t, "k3": k3_t, "k4": k4_t, "r4": r4_t, "r3": r3_t}
+    return Figures({k: Markup(v) for k, v in figs.items() if v}, tables)

@@ -181,7 +181,7 @@ def _waste(id_prefix: str) -> str:
         [
             el("clipPath", el("path", d=outline), id=clip_id),
             path(outline, "f-soft"),
-            el("g", path("".join(cells), "f-grey"), clip_path=f"url(#{clip_id})"),
+            el("g", path("".join(cells), "f-waste"), clip_path=f"url(#{clip_id})"),
         ]
     )
 
@@ -254,8 +254,8 @@ def _flare() -> str:
     return "".join(
         [
             rect(x - w / 2, FLARE_TOP, w, GY - FLARE_TOP, "s f-paper"),
-            rect(x - 12, GY - 7, 24, 7, "s f-grey", rx=1.5),
-            rect(x - w / 2 - 2.5, FLARE_TOP - 5, w + 5, 6, "s f-grey", rx=1.5),
+            rect(x - 12, GY - 7, 24, 7, "s f-metal", rx=1.5),
+            rect(x - w / 2 - 2.5, FLARE_TOP - 5, w + 5, 6, "s f-metal", rx=1.5),
             path(flame, "s f-flame"),
         ]
     )
@@ -271,7 +271,7 @@ def _monitor_wells() -> str:
         slots = "".join(f"M{r(x - t + 1)},{r(wt - 8 + 4 * i)}H{r(x + t - 1)}" for i in range(int((bottom - wt + 4) // 4) + 1))
         out.append(rect(x - t, GY - 6, PIPE, bottom - GY + 6, "s f-paper", rx=t))
         out.append(path(slots, "s ln thin"))
-        out.append(rect(x - 5, GY - 14, 10, 16, "s f-grey", rx=1.5))
+        out.append(rect(x - 5, GY - 14, 10, 16, "s f-metal", rx=1.5))
     return "".join(out)
 
 

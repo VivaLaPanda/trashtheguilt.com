@@ -37,10 +37,10 @@ DOG_COLLAR = "M46.5,31.5C55,35 65,37 73.6,36.5L74.3,41C65,41.5 55,39.5 46,36Z"
 def dog(x: float, y: float, k: float = 1, ground: bool = True, collar: str = "f-ink") -> str:
     """A happy dog sitting, facing right, in a 100 x 100 box at k=1; paws on y=98."""
     parts = [
-        path(DOG_TAIL, "s f-grey"),
-        path(DOG_BODY, "s f-grey"),
+        path(DOG_TAIL, "s f-fur"),
+        path(DOG_BODY, "s f-fur"),
         path(DOG_LINES, "s ln"),
-        path(DOG_EAR, "s f-grey2"),
+        path(DOG_EAR, "s f-fur2"),
         path(DOG_COLLAR, f"s {collar}"),
         path(DOG_TONGUE, "s f-tongue"),
         path(DOG_MOUTH, "s ln"),
@@ -81,11 +81,11 @@ CAN_DROPS = "M43.8,9C46.3,13 47.3,15.3 47.3,17A3.5,3.5 0 0 1 40.3,17C40.3,15.3 4
 def can(x: float = 0, y: float = 0, k: float = 1, drops: bool = True) -> str:
     """Aluminum beverage can, 48 x 68 at k=1, top-left at (x, y); accent label band, optional rinse drops."""
     parts = [
-        path(CAN_BODY, "s f-soft"),
+        path(CAN_BODY, "s f-metal"),
         path(CAN_BAND, "f-accent"),
         path("M9,28Q24,32 39,28M9,45Q24,49 39,45", "s ln"),
         path("M9,14Q24,18 39,14M9,60Q24,64 39,60", "s ln thin"),
-        _ellipse(24, 8, 11, 3.4, "s f-soft"),
+        _ellipse(24, 8, 11, 3.4, "s f-metal"),
         _ellipse(24, 8.3, 8.6, 2.3, "s ln thin"),
         path("M20.5,8.3H27.5", "s ln"),
     ]
@@ -105,8 +105,8 @@ def card_dog_vs_bag() -> str:
         bar_v(x3, base, bw, unit * 3, "f-grey"),
         bar_v(x1, base, bw, unit, "f-accent"),
         bag(172, base - 47.5 * 0.8, 0.8),
-        text(x3 + bw / 2, base - unit * 3 - 7, "3", "t t-big", anchor="middle"),
-        text(x1 + bw / 2, base - unit - 7, "1", "t t-big", anchor="middle"),
+        text(x3 + bw / 2, base - unit * 3 - 7, "3x", "t t-big", anchor="middle"),
+        text(x1 + bw / 2, base - unit - 7, "1x", "t t-big", anchor="middle"),
         path(f"M8,{base}H210", "s ln"),
     ]
     return svg(216, 132, "".join(p), "A happy dog and a grocery bag; the dog's bar is three times the bag's")

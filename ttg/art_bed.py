@@ -121,9 +121,9 @@ def bed(x: float, y: float, s: float, footprint_sq_ft: tuple[float, float] | Non
     """
     w, h = BED_W * s, BED_H * s
     p = [
-        rect(x + 0.6 * s, y - 3.6 * s, w - 1.2 * s, 4.6 * s, "s f-grey", rx=1.4 * s),
+        rect(x + 0.6 * s, y - 3.6 * s, w - 1.2 * s, 4.6 * s, "s f-wood", rx=1.4 * s),
         rect(x, y, w, h, "s f-paper", rx=CORNER * s),
-        rect(x, y + FOLD_Y * s, w, (BED_H - FOLD_Y - CORNER) * s, "f-soft"),
+        rect(x, y + FOLD_Y * s, w, (BED_H - FOLD_Y - CORNER) * s, "f-sheet"),
         path(f"M{r(x)},{r(y + FOLD_Y * s)}H{r(x + w)}", "s ln thin"),
         _pillow(x, y, s),
     ]
@@ -157,7 +157,7 @@ def doormat(x: float, y: float, s: float, footprint_sq_ft: tuple[float, float] |
     w, h = MAT_W * s, MAT_H * s
     cx, cy = x + w / 2, y + h / 2
     p = [
-        rect(x, y, w, h, "s f-grey", rx=1.6 * s),
+        rect(x, y, w, h, "s f-clay", rx=1.6 * s),
         rect(x + 2.2 * s, y + 2.2 * s, w - 4.4 * s, h - 4.4 * s, "s ln thin", rx=0.8 * s),
     ]
     if footprint_sq_ft:
