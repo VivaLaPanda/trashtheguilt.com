@@ -1,0 +1,9 @@
+dist/
+.venv/
+__pycache__/
+.wrangler/
+node_modules/
+.env
+.env.*
+secrets.txt
+*.pem

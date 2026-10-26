@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ meta.title }}</title>
+<meta name="description" content="{{ meta.description }}">
+<link rel="canonical" href="{{ site }}/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="trashtheguilt.com">
+<meta property="og:url" content="{{ meta.url }}">
+<meta property="og:title" content="{{ meta.og_title }}">
+<meta property="og:description" content="{{ meta.description }}">
+<meta property="og:image" content="{{ site }}/og/{{ meta.image }}.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{ meta.og_title }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f6f5f1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/{{ css }}">
+</head>
+<body>
+<header class="wrap hero">
+  <h1>Garbage in,<br> guilt out.</h1>
+</header>
+
+<div class="wrap cards">
+  <article class="card" id="c1">
+    <a class="art" href="#ocean" tabindex="-1" aria-hidden="true">{{ figs.c1 }}</a>
+    <p class="num">26x.</p>
+    <p class="line">One river in Manila puts 26 times more plastic into the ocean than every US river combined.{{ n.start("ocean") }}{{ n.fn("meijer_data", "owid_meijer") }}</p>
+    <p class="more"><a href="#ocean">Ocean &darr;</a></p>
+  </article>
+  <article class="card" id="c2">
+    <a class="art" href="#landfills" tabindex="-1" aria-hidden="true">{{ figs.c2 }}</a>
+    <p class="num">Twin bed.</p>
+    <p class="line">Your lifetime of trash, buried, takes up less floor space than a twin bed.{{ n.start("landfills") }}{{ n.fn("epa2018", "calc:landfills") }}</p>
+    <p class="more"><a href="#landfills">Landfills &darr;</a></p>
+  </article>
+  <article class="card" id="c3">
+    <a class="art" href="#climate" tabindex="-1" aria-hidden="true">{{ figs.c3 }}</a>
+    <p class="num">3 to 1.</p>
+    <p class="line">Your dog &gt; your plastic, 3 to 1.{{ n.start("climate") }}{{ n.fn("berners_lee", "calc:climate") }} You don't sweat the kibble. Don't sweat the bag.</p>
+    <p class="more"><a href="#climate">Climate &darr;</a></p>
+  </article>
+</div>
+
+<main>
+{{ n.start("ocean") }}
+<section class="dive" id="ocean">
+<div class="wrap"><div class="col">
+  <p class="kicker">Ocean</p>
+  <p class="claim">US rivers carry about 2,400 tonnes of plastic to the ocean a year: 0.25% of the world total, about 7 grams per American.{{ n.fn("owid_meijer", "calc:ocean") }}</p>
+
+  <h3>Exports</h3>
+  <p>The river model leaves out US plastic shipped abroad. Even counted at worst case, the US stays under 2% of the world total, and the Pasig alone is still nearly 4 times the whole US.{{ n.fn("rr2025", "owid_trade", "calc:ocean") }} The 26x figure above counts US rivers only.</p>
+  <table class="facts">
+    <thead><tr><th>Stat</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>US plastic scrap exports, 2024: 903M lb (about 410,000 tonnes)</td><td class="src">{{ n.cite("rr2025", "Resource Recycling") }}</td></tr>
+      <tr><td>55% went to Canada and Mexico; 28% to India, Malaysia, Vietnam and Indonesia</td><td class="src">Same; shares calculated</td></tr>
+      <tr><td>Method: treat every tonne sent to Mexico and those four countries (about 202,000 t) as mismanaged, with 1% to 7% reaching the sea</td><td class="src">Bounds from {{ n.cite("owid_trade", "Our World in Data") }}</td></tr>
+      <tr><td>Result: exports add 2,000 to 14,100 t, so the US total is 4,400 to 16,600 t a year, 0.45% to 1.7% of the world's</td><td class="src">Calculation</td></tr>
+      <tr><td>The Pasig River alone is still 3.8 to 14 times the US total, exports included</td><td class="src">Calculation</td></tr>
+      <tr><td>Context: world plastic waste trade fell about two-thirds after 2010, and China stopped taking it in 2018</td><td class="src">{{ n.cite("owid_trade", "Our World in Data") }}</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <p class="title">The US is a quarter of one percent of the plastic rivers carry to the ocean</p>
+    {{ figs.o3 }}
+    <p class="source">Source: {{ n.cite("owid_meijer", "Meijer et al. 2021, Science Advances") }}, 2015 estimates</p>
+    {{ tables.o3 }}
+  </figure>
+
+  <table class="facts">
+    <thead><tr><th>Stat</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>US: 2,431 tonnes a year enter the ocean from rivers (2015)</td><td class="src">{{ n.cite("meijer", "Meijer et al. 2021, <em>Science Advances</em>"|safe) }}, country data</td></tr>
+      <tr><td>Per American: about 7 g a year, less than one 8 g grocery bag</td><td class="src">2,431 t / 328M people (2019); bag weight from {{ n.cite("uk_ea_bags", "UK Environment Agency") }}</td></tr>
+      <tr><td>Per person: Philippines 3.2 kg a year; Europe under 0.1 kg</td><td class="src">{{ n.cite("owid_meijer", "Meijer et al. 2021") }} country data, per person (2019 population)</td></tr>
+      <tr><td>Asia: 81% of global inputs</td><td class="src">Sum of Asian countries in {{ n.cite("owid_meijer", "Meijer et al. 2021") }}</td></tr>
+      <tr><td>Marine sources (fishing gear, ropes, abandoned vessels): 20 to 30% of ocean plastic by weight. Lines, ropes and nets are 52% of the plastic mass in the Great Pacific Garbage Patch</td><td class="src">Patch: {{ n.cite("lebreton", "Lebreton et al. 2018") }}, <em>Scientific Reports</em>. 20 to 30% range: {{ n.cite("owid_ocean", "Our World in Data") }}</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <p class="title">An American's yearly 7 g is less than one 8 g grocery bag</p>
+    {{ figs.o4 }}
+    <p class="source">Sources: {{ n.cite("owid_meijer", "Meijer et al. 2021") }}; bag weight from {{ n.cite("uk_ea_bags", "UK Environment Agency") }}</p>
+  </figure>
+
+  <details class="more" id="ocean-methods">
+    <summary>How we calculated</summary>
+    <div class="body">
+      <p>A model of plastic over 0.5 cm reaching the sea through rivers (Meijer et al. 2021).{{ n.fn("meijer") }} The paper puts each river's estimate within a factor of 4 (68% confidence), so a river estimated at 100 tonnes could plausibly be 25 to 400. It excludes waste shipped abroad and microplastics.</p>
+    </div>
+  </details>
+  <details class="more">
+    <summary>Common objections</summary>
+    <div class="body objection">
+      <h4>What would help the ocean?</h4>
+      <p>Waste collection where it is missing. Mismanaged plastic per person in the Philippines is 84 times the UK's ({{ n.cite("owid_mismanaged", "Meijer et al. 2021") }} data).</p>
+    </div>
+  </details>
+  {{ n.section_list() }}
+</div></div>
+</section>
+
+{{ n.start("landfills") }}
+<section class="dive" id="landfills">
+<div class="wrap"><div class="col">
+  <p class="kicker">Landfills</p>
+  <p class="claim">One American's lifetime of trash, buried 100 ft deep, covers about 15 sq ft: less than a twin bed.{{ n.fn("epa2018", "calc:landfills") }}</p>
+  <table class="facts">
+    <thead><tr><th>Stat</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>US, 2018: 292.4M tons generated; 146.1M landfilled (50%); 34.6M burned for energy (11.8%)</td><td class="src">{{ n.cite("epa2018", "EPA") }}</td></tr>
+      <tr><td>Per American: about 890 lb landfilled a year, about 19 cu ft</td><td class="src"><a href="#landfills-methods" class="open-methods">Calculation</a></td></tr>
+      <tr><td>Per lifetime (79 years): about 1,540 cu ft, less than one one-car garage (12 x 20 x 8 ft)</td><td class="src"><a href="#landfills-methods" class="open-methods">Calculation</a></td></tr>
+      <tr><td>Footprint at 100 ft deep: about 15 sq ft; a twin bed is 20 sq ft (38 x 75 in)</td><td class="src"><a href="#landfills-methods" class="open-methods">Calculation</a></td></tr>
+      <tr><td>Burned like Japan, it shrinks to about 2.5 sq ft, under a 2 x 3 ft doormat. Japan sends 8.0% of its waste to final disposal (2024); the US landfills 50%. Safety of burning: <a href="#burning" class="open-objection">see below</a></td><td class="src">{{ n.cite("japan_moe", "Japan Ministry of the Environment") }}</td></tr>
+      <tr><td>A full year of US landfilled trash fits on Golden Gate Park (1,017 acres), piled about 144 ft high</td><td class="src">{{ n.cite("ggp", "SF Recreation and Parks") }}; calculation</td></tr>
+      <tr><td>Landfills cover about 0.01% of US land</td><td class="src">{{ n.cite("lmop_data", "EPA landfill data") }}, via {{ n.cite("wip", "Works in Progress") }}</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <p class="title">A lifetime of trash, buried 100 ft deep, covers about 15 sq ft: less than a twin bed</p>
+    {{ figs.l3 }}
+    <p class="source">Sources: {{ n.cite("epa2018", "EPA 2018") }}; <a href="#landfills-methods" class="open-methods">calculation</a>. Doormat: <a href="#burning" class="open-objection">is burning trash safe?</a></p>
+  </figure>
+
+  <figure>
+    <p class="title">Modern landfills are sealed, drained and monitored.</p>
+    {{ figs.l4 }}
+  </figure>
+
+  <details class="more" id="landfills-methods">
+    <summary>How we calculated</summary>
+    <div class="body">
+      <ul>
+        <li>Density: 0.62 short tons per cu yd, the compacted density in {{ n.cite("pa_landfill", "one Pennsylvania landfill's filing") }}; EPA landfill data put the median near 0.64. At the 1997 national average of 0.37 ({{ n.cite("waste360_2011", "739 lb per cu yd") }}), the footprint would be 26 sq ft.</li>
+        <li>Depth: 100 ft is the median design depth of open US landfills in {{ n.cite("lmop_data", "EPA's landfill data") }}. Life: 79 years, US life expectancy in 2024 ({{ n.cite("cdc_life", "CDC") }}).</li>
+        <li>Japan scaling uses tonnage (6.2x less). Ash is denser than raw trash, so the real volume is smaller.</li>
+      </ul>
+    </div>
+  </details>
+  <details class="more" id="landfills-objections">
+    <summary>Common objections</summary>
+    <div class="body objection">
+      <h4>Don't landfills leak?</h4>
+      <p>New York reviewed 31 lined landfills built after 1988 (27 municipal, 4 hazardous waste), about 450 years of combined operation, and found no groundwater harm from leaks through their liners ({{ n.cite("nrc2007", "National Academies") }}).</p>
+      <h4>What about methane?</h4>
+      <p>Municipal landfills produce 14.4% of US methane ({{ n.cite("epa_lmop", "EPA, 2022") }}). About 58% of it comes from food waste ({{ n.cite("epa_food_methane", "EPA") }}); plastic does not rot. Aerial surveys found landfills emit 1.4 to 2.7 times the methane they report to EPA ({{ n.cite("cusworth", "Cusworth et al. 2024") }}). The fix is food scraps, not plastic.</p>
+      <h4>Are we running out of space?</h4>
+      <p>The US has about 62 years of capacity in its current landfills, by a 2015 EREF estimate ({{ n.cite("waste360_capacity", "Waste360") }}). Shortages are regional and come from permitting, not a lack of land.</p>
+      <h4 id="burning">Isn't burning trash toxic?</h4>
+      <p>Not with modern controls. From 1990 to 2005, US waste combustors cut dioxin emissions by over 99% (4,400 to 15 g TEQ a year), mercury by 96% and lead by 97% ({{ n.cite("epa_combustion", "EPA") }}). EPA says fossil-fuel power plants produce most US mercury and particulate pollution (same source, 2005 data). Copenhagen's CopenHill plant burned 610,000 t of waste in 2024, supplied electricity for about 99,000 homes and heat for about 92,000, and has a public ski slope on its roof ({{ n.cite("arc2024", "ARC annual report 2024") }}). Its climate cost is already counted in the climate section: burning is the 3.08 kg CO2 per kg line.</p>
+    </div>
+  </details>
+  {{ n.section_list() }}
+</div></div>
+</section>
+
+{{ n.start("climate") }}
+<section class="dive" id="climate">
+<div class="wrap"><div class="col">
+  <p class="kicker">Climate</p>
+  <p class="claim">A year of one American's single-use plastic emits about 130 to 250 kg of CO2e, roughly 0.7 to 1.3% of a typical US footprint.{{ n.fn("warm_plastics", "epa_ghg", "calc:climate") }}</p>
+  <p>Per kg of plastic: making it, +2.5 kg CO2e; burning it, +3.08; electricity recovered from burning, minus 0.86; net 4.7 kg CO2e if burned, 2.5 kg if buried.{{ n.fn("warm_plastics", "zheng_suh") }} An American throws away about 53 kg of single-use plastic a year.{{ n.fn("minderoo") }} So: 130 kg a year if all buried, 250 kg if all burned. Every input is sourced below; polyethylene values are used throughout.</p>
+  <table class="facts">
+    <thead><tr><th>Line</th><th>Figure</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>Make: resin</td><td>1.68 kg CO2e per kg (virgin HDPE, 1.52 t per short ton)</td><td class="src">{{ n.cite("warm_plastics", "EPA WARM v16, Plastics, Exhibit 5-7") }}</td></tr>
+      <tr><td>Make: forming it into products</td><td>Adds 49% on top of resin (global conversion 535 Mt vs resin 1,085 Mt CO2e, 2015). 1.68 x 1.49 = 2.5</td><td class="src">{{ n.cite("zheng_suh", "Zheng and Suh 2019") }}, <em>Nature Climate Change</em></td></tr>
+      <tr><td>Burn</td><td>3.08 kg CO2 per kg (86% carbon, 98% oxidized)</td><td class="src">{{ n.cite("warm_plastics", "EPA WARM v16, Exhibit 5-17") }}</td></tr>
+      <tr><td>Energy back</td><td>2.3 kWh per kg (40.0 MMBtu per short ton at 17.8% plant efficiency) x 0.373 kg CO2 per kWh = 0.86</td><td class="src">{{ n.cite("warm_plastics", "EPA WARM v16, Exhibit 5-18") }}; grid factor 823.1 lb per MWh, {{ n.cite("egrid", "EPA eGRID2022") }}</td></tr>
+      <tr><td>Bury</td><td>0.02 kg per kg (trucks only; plastic makes no methane)</td><td class="src">{{ n.cite("warm_plastics", "EPA WARM v16, Exhibit 5-19") }}</td></tr>
+      <tr><td>Use</td><td>53 kg single-use plastic waste per American, 2019</td><td class="src">{{ n.cite("minderoo", "Minderoo Foundation, Plastic Waste Makers Index 2021") }}</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <p class="title">Burned, a kg of plastic nets 4.7 kg of CO2e; buried, 2.5 kg</p>
+    {{ figs.k3 }}
+    <p class="source">Source: {{ n.cite("warm_plastics", "EPA WARM v16") }}; {{ n.cite("zheng_suh", "Zheng and Suh 2019") }}; {{ n.cite("egrid", "EPA eGRID2022") }}</p>
+    {{ tables.k3 }}
+  </figure>
+
+  <figure>
+    <p class="title">A year of your plastic, 130 to 250 kg of CO2e, is the smallest line here</p>
+    {{ figs.k4 }}
+    <p class="source">Sources: <a href="#climate-methods" class="open-methods">see How we calculated</a></p>
+    {{ tables.k4 }}
+  </figure>
+
+  <div class="box">
+    <h3>Pound for pound, plastic is gasoline</h3>
+    <p>Burning a pound of polyethylene emits the same CO2 as burning a pound of gasoline, 3.08 vs 3.07 kg per kg ({{ n.cite("warm_plastics", "EPA WARM v16, Exhibit 5-17") }}; {{ n.cite("ipcc2006", "IPCC 2006 defaults") }}: 69,300 kg CO2 per TJ x 44.3 TJ per thousand t). Counting manufacture, a pound of plastic is 0.8x (buried) to 1.5x (burned) a pound of gasoline at the tailpipe. A year of your plastic, 130 to 250 kg CO2e, equals 15 to 28 gallons of gas at 8.887 kg per gallon ({{ n.cite("epa_vehicle", "EPA") }}): one or one and a half drives to Tahoe and back. Rule of thumb: weigh your plastic, and picture that weight in gasoline.</p>
+  </div>
+
+  <div class="box">
+    <h3>Uses needed to match one plastic grocery bag</h3>
+    <table>
+      <thead><tr><th>Bag</th><th class="n">Climate only</th><th class="n">All environmental impacts</th></tr></thead>
+      <tbody>
+        <tr><td>Paper</td><td class="n">0 to 1</td><td class="n">43</td></tr>
+        <tr><td>Woven plastic tote</td><td class="n">5</td><td class="n">45</td></tr>
+        <tr><td>Cotton tote</td><td class="n">52</td><td class="n">7,100</td></tr>
+        <tr><td>Organic cotton tote</td><td class="n">149</td><td class="n">20,000</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Baseline: a standard 24 g supermarket plastic bag, reused once as a bin liner. Cotton's all-category figure is driven by ozone depletion; without it, 50 to 1,400 uses (organic cotton: 150 to 3,800). Source: {{ n.cite("danish_epa", "Danish Environmental Protection Agency 2018, LCA of grocery carrier bags, Table IV") }}.</p>
+  </div>
+
+  <details class="more" id="climate-methods">
+    <summary>How we calculated</summary>
+    <div class="body">
+      <p>Greenhouse gases in CO2e on both sides; the burning, driving and flight lines are almost all CO2.</p>
+      <ul>
+        <li>Flight: 8,630 km each way x 0.069 kg per passenger-km, the UK government's 2025 long-haul economy factor without contrail effects ({{ n.cite("desnz", "DESNZ") }}).</li>
+        <li>Tahoe: 190 to 220 miles each way ({{ n.cite("shaka", "Shaka Guide") }}) x 0.4 kg per mile ({{ n.cite("epa_vehicle", "EPA") }}) x 5 trips.</li>
+        <li>Dog: 770 kg for an average-sized dog ({{ n.cite("berners_lee", "Mike Berners-Lee") }}) and 530 kg for its food alone, with a different way of splitting meat emissions between pet and human food ({{ n.cite("edinburgh", "Edinburgh") }}).</li>
+        <li>Cheese: 40.15 lb per person in 2023 ({{ n.cite("ers_cheese", "USDA ERS") }}) x 23.88 kg CO2e per kg ({{ n.cite("poore", "Poore and Nemecek 2018") }}, <em>Science</em>).</li>
+      </ul>
+      <p>WARM covers resin only, so the 49% for forming products comes from the global study. Zheng and Suh's global average, about 4.0 kg per kg to make on coal-heavy grids, would raise the burned case to 330 kg; that is still under the dog's low estimate of 530. WARM credits burning against marginal power plants (1.68 per kg); we use the average grid, which is less favorable to burning. On EPA's current marginal rate, the burned case would be 218 kg.</p>
+      <p>The card's "3 to 1" uses the dog's high estimate (770 kg) against the burned plastic (250 kg). The chart shows the full ranges.</p>
+    </div>
+  </details>
+  <details class="more">
+    <summary>Common objections</summary>
+    <div class="body objection">
+      <h4>Isn't plastic made from oil?</h4>
+      <p>Yes. Drilling, refining and manufacturing are all inside the 2.5 kg production figure.</p>
+    </div>
+  </details>
+  {{ n.section_list() }}
+</div></div>
+</section>
+
+{{ n.start("bin") }}
+<section class="dive" id="bin">
+<div class="wrap"><div class="col">
+  <p class="kicker">In the bin</p>
+  <p class="claim">Under 10% of US plastic is recycled; aluminum cans are the bin item with by far the largest climate payoff per pound.{{ n.fn("epa_plastics", "warm_plastics") }}</p>
+  <table class="facts">
+    <thead><tr><th>Stat</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>US plastic, 2018: 35.7M tons; 3.1M recycled (8.7%), 5.6M burned for energy, 27M landfilled</td><td class="src">{{ n.cite("epa_plastics", "EPA, Plastics: Material-Specific Data") }}</td></tr>
+      <tr><td>By 2021 the rate was about 5%, by estimate: 2.4M of 51M tons</td><td class="src">{{ n.cite("lbc2022", "Last Beach Cleanup and Beyond Plastics") }}, cited by Greenpeace</td></tr>
+      <tr><td>Recycled, 2018: PET (#1) 18.5%, HDPE (#2) 8.9%, types #3 to #7 under 5%</td><td class="src">EPA data, in {{ n.cite("greenpeace2022", "Greenpeace 2022, Table A-3") }}</td></tr>
+      <tr><td>About 17% of what goes into US curbside recycling is contamination</td><td class="src">{{ n.cite("trp2020", "The Recycling Partnership") }}</td></tr>
+      <tr><td>Recycling mid-grade plastic costs an estimated $1,000 or more per tonne of CO2 avoided; direct air capture sells for about $490 on average</td><td class="src">Estimate: {{ n.cite("wip", "Works in Progress") }}; price: {{ n.cite("wri_dac", "WRI") }}</td></tr>
+      <tr><td>Recycling a short ton of aluminum cans instead of landfilling saves 9.15 t CO2e, about 0.13 kg per can</td><td class="src">{{ n.cite("warm_plastics", "EPA WARM v16, Exhibit 2-7") }}; per-can figure assumes a 13 g can ({{ n.cite("alu_lca", "Aluminum Association") }})</td></tr>
+      <tr><td>Recycling programs' own advice: when in doubt, throw it out</td><td class="src">{{ n.cite("epa_doubt", "EPA") }}</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <p class="title">Three quarters of US plastic goes to landfill.</p>
+    {{ figs.r3 }}
+    <p class="source">Source: {{ n.cite("epa_plastics", "EPA, Plastics: Material-Specific Data") }}, 2018</p>
+  </figure>
+
+  <figure>
+    <p class="title">Even PET, the most recycled plastic, is at 18.5%</p>
+    {{ figs.r4 }}
+    <p class="source">Source: EPA 2018 data, in {{ n.cite("greenpeace2022", "Greenpeace 2022, Table A-3") }}</p>
+    {{ tables.r4 }}
+  </figure>
+
+  <div class="box callout">
+    {{ figs.can }}
+    <div>
+      <p class="big">The one thing worth rinsing: cans.</p>
+      <p>About 0.13 kg of CO2e saved per can, so roughly 1,900 cans equal a year of single-use plastic.{{ n.fn("warm_plastics", "alu_lca", "calc:climate") }}</p>
+    </div>
+  </div>
+
+  <details class="more">
+    <summary>Common objections</summary>
+    <div class="body objection">
+      <h4>So should I stop recycling?</h4>
+      <p>For plastic, yes. About three quarters of it is landfilled anyway, recycling it costs an estimated $900 or more per ton of CO2 avoided, and a year of it is under 2% of your footprint. Keep rinsing cans: each one saves about 0.3 lb of CO2e.{{ n.fn("epa_plastics", "wip", "calc:climate", "warm_plastics") }}</p>
+    </div>
+  </details>
+  {{ n.section_list() }}
+</div></div>
+</section>
+</main>
+
+<section class="closer">
+<div class="wrap"><div class="col">
+  <h2>Worry less. Build more.</h2>
+  <p>Humans have a real footprint. Parts of it, like how we make energy, need urgent effort. Your trash isn't one of them. The planet doesn't need your guilt. It needs clean power, more housing, and garbage trucks in places that don't have them yet.</p>
+  <div class="share">
+    {% for s in shares %}<button type="button" data-url="{{ site }}/{{ s.slug }}/" data-text="{{ s.text }}">{{ share_icon }}{{ s.label }}</button>{% endfor %}
+    <p class="status" role="status" aria-live="polite"></p>
+  </div>
+</div></div>
+</section>
+
+<footer>
+<div class="wrap"><div class="col">
+  <h2>Sources</h2>
+  {{ n.all() }}
+  <h2>Methods</h2>
+  <ol>
+    <li><a href="#ocean-methods" class="open-methods">Ocean</a></li>
+    <li><a href="#landfills-methods" class="open-methods">Landfills</a></li>
+    <li><a href="#climate-methods" class="open-methods">Climate</a></li>
+  </ol>
+  <h2>About</h2>
+  <p>Modern disposal is contained and far from the ocean, so trash is not where your environmental worry should go.</p>
+  <p class="made">Made by <a href="https://panda.moe">panda.moe</a></p>
+</div></div>
+</footer>
+<script src="/{{ js }}" defer></script>
+</body>
+</html>
