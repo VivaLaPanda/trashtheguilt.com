@@ -8,10 +8,10 @@ from pathlib import Path
 
 from markupsafe import Markup
 
-from ttg import art
+from ttg import art, art_bed, art_landfill, art_objects
 from ttg.charts import Flow, Row, Step, hbars, ranges, sankey, waterfall
 from ttg.numbers import BIN, CLIMATE, LANDFILL, OCEAN, Country
-from ttg.svg import bar_v, el, path, r, rect, svg, text
+from ttg.svg import el, path, r, rect, svg, text
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 
@@ -44,23 +44,12 @@ def card_ocean() -> str:
 def card_landfill() -> str:
     fp = LANDFILL.footprint_sq_ft
     s = 1.22
-    body = art.bed(0, 6, s, (fp.low, fp.high))
-    return svg(38 * s, 75 * s + 8, body, "A twin bed seen from above, with a lifetime of buried trash drawn to scale inside it")
+    body = art_bed.bed(1.5, 6, s, (fp.low, fp.high))
+    return svg(38 * s + 3, 75 * s + 8, body, "A twin bed seen from above, with a lifetime of buried trash drawn to scale inside it")
 
 
 def card_climate() -> str:
-    base = 128
-    bar_w = 24
-    unit = 30
-    parts = [art.dog(0, 26, 1.02)]
-    x_dog, x_bag = 128, 176
-    parts.append(bar_v(x_dog, base, bar_w, unit * 3, "f-grey"))
-    parts.append(bar_v(x_bag, base, bar_w, unit, "f-accent"))
-    parts.append(art.bag(x_bag + 2, base - unit - 26, 0.5))
-    parts.append(text(x_dog + bar_w / 2, base - unit * 3 - 7, "3", "t t-big", anchor="middle"))
-    parts.append(text(x_bag + bar_w / 2 + 22, base - unit + 4, "1", "t t-big", anchor="middle"))
-    parts.append(path(f"M112,{base}H214", "s ln"))
-    return svg(216, 132, "".join(parts), "A happy dog beside a grocery bag; the dog's bar is three times the bag's")
+    return art_objects.card_dog_vs_bag()
 
 
 # Ocean
@@ -78,15 +67,15 @@ def o3() -> tuple[str, Markup]:
 
 
 def _mound(n: int, cols: int) -> list[tuple[int, int]]:
-    """Cells (col, row) for a half-ellipse pile of exactly n items, row 0 at the bottom."""
+    """Cells (col, row) for a centered half-ellipse pile of exactly n items, row 0 at the bottom."""
     rows = math.ceil(n / cols * 4 / math.pi)
-    cells: list[tuple[int, int]] = []
-    for rw in range(rows):
-        width = round(cols * math.sqrt(max(0.0, 1 - (rw / rows) ** 2)))
-        start = (cols - width) // 2
-        cells.extend((start + c, rw) for c in range(width))
-    cells = cells[:n]
-    return cells
+    widths = [round(cols * math.sqrt(max(0.0, 1 - (rw / rows) ** 2))) for rw in range(rows)]
+    excess = sum(widths) - n
+    for rw in reversed(range(rows)):
+        cut = min(excess, widths[rw])
+        widths[rw] -= cut
+        excess -= cut
+    return [((cols - w) // 2 + c, rw) for rw, w in enumerate(widths) for c in range(w)]
 
 
 def o4() -> str:
@@ -94,23 +83,23 @@ def o4() -> str:
     p: list[str] = []
     clip = "o4clip"
     frac = o.per_american_g / o.bag_g
-    p.append(art.bag(70, 8))
+    p.append(art_objects.bag(70, 8))
     p.append(text(90, 74, f"One grocery bag: {o.bag_g:.0f} g", "t t-strong", anchor="middle"))
     # the American's year: the same bag, filled to 7/8 by height
     bx, by = 270, 8
     p.append(el("clipPath", rect(bx, by + 48 * (1 - frac), 40, 48 * frac, ""), id=clip))
-    p.append(art.bag(bx, by))
-    p.append(el("g", art.bag(bx, by, cls="f-accent"), clip_path=f"url(#{clip})"))
+    p.append(art_objects.bag(bx, by))
+    p.append(el("g", art_objects.bag(bx, by, cls="f-accent"), clip_path=f"url(#{clip})"))
     p.append(text(290, 74, f"An American's year: {o.per_american_g:.0f} g", "t t-strong", anchor="middle"))
     # the Philippines: one glyph per bag
     n = round(o.philippines_bags)
-    cols = 46
-    k = 0.17
+    cols = 36
+    k = 0.22
     gw, gh = 40 * k + 1.3, 48 * k + 1.2
     cells = _mound(n, cols)
-    base = 214
+    base = 104 + math.ceil(n / cols * 4 / math.pi) * (48 * k + 1.2)
     x0 = (400 - cols * gw) / 2
-    glyphs = "".join(art.bag_glyph(x0 + c * gw, base - (rw + 1) * gh, k) for c, rw in cells)
+    glyphs = "".join(art_objects.bag_glyph(x0 + c * gw, base - (rw + 1) * gh, k) for c, rw in cells)
     p.append(el("g", glyphs))
     p.append(path(f"M{r(x0 - 6)},{base}H{r(x0 + cols * gw + 6)}", "s ln"))
     about = round(n, -2)
@@ -125,28 +114,13 @@ def o4() -> str:
 def l3() -> str:
     lf = LANDFILL
     fp, jp = lf.footprint_sq_ft, lf.japan_footprint_sq_ft
-    s = 2.3
-    p: list[str] = [art.bed(24, 26, s, (fp.low, fp.high))]
-    bed_w, bed_h = 38 * s, 75 * s
-    tx = 24 + bed_w + 22
-    p.append(text(tx, 50, f"Twin bed: {lf.bed_sq_ft:.0f} sq ft", "t t-strong"))
-    p.append(rect(tx, 62, 12, 12, "f-accent", rx=2))
-    p.append(text(tx + 18, 72, "A lifetime of trash,", "t"))
-    p.append(text(tx + 18, 86, f"buried: {fp.low:.0f} to {fp.high:.0f} sq ft", "t"))
-    p.append(rect(tx, 98, 12, 12, "f-accent-soft", rx=2))
-    p.append(text(tx + 18, 108, "Range of the estimate", "t t-muted"))
-    # inset: the doormat at the same scale, linked to the burning objection
-    my = 26 + bed_h - 24 * s
-    inset = art.doormat(tx, my, s, (jp.low, jp.high))
-    inset += text(tx, my - 24, f"Doormat: {lf.doormat_sq_ft:.0f} sq ft", "t t-strong")
-    inset += text(tx, my - 10, "with Japan-style incineration", "t")
-    p.append(el("a", inset, href="#burning", class_="open-objection"))
-    p.append(text(tx, 26 + bed_h + 18, f"Burned: {jp.low:.1f} to {jp.high:.1f} sq ft", "t t-muted"))
-    return svg(400, 26 + bed_h + 28, "".join(p), "A twin bed seen from above with a lifetime of buried trash drawn inside it, and a doormat showing the same trash after incineration")
+    body, h = art_bed.l3_figure(lf.bed_sq_ft, (fp.low, fp.high), (jp.low, jp.high), lf.doormat_sq_ft)
+    return svg(400, h, body, "A twin bed seen from above with a lifetime of buried trash drawn inside it, and a doormat showing the same trash after incineration")
 
 
 def l4() -> str:
-    return svg(400, 300, art.landfill(), "Modern landfills are sealed, drained and monitored.")
+    body, h = art_landfill.landfill()
+    return svg(400, h, body, "Modern landfills are sealed, drained and monitored.")
 
 
 # Climate
@@ -210,14 +184,7 @@ def r4() -> tuple[str, Markup]:
 
 
 def can() -> str:
-    body = (
-        path("M8,10Q8,6 12,5H36Q40,6 40,10V58Q40,62 36,63H12Q8,62 8,58Z", "s f-paper")
-        + path("M8,16H40M8,54H40", "s ln")
-        + rect(8, 24, 32, 22, "f-accent")
-        + path("M8,24H40M8,46H40", "s ln")
-        + path("M18,8H30", "s ln thick")
-    )
-    return svg(48, 68, body, "An aluminum can", cls="fig can")
+    return svg(48, 68, art_objects.can(), "An aluminum can", cls="fig can")
 
 
 @dataclass(frozen=True)

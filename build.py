@@ -3,13 +3,14 @@
 import argparse
 import hashlib
 import os
+import re
 import shutil
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
-from markupsafe import Markup
+from markupsafe import Markup, escape
 from playwright.sync_api import sync_playwright
 
 from ttg import figures
@@ -64,6 +65,19 @@ def fingerprint(src: Path, dest_dir: Path) -> str:
     return f"assets/{name}"
 
 
+def titled(figs: figures.Figures):
+    """Template helper: a chart title plus its SVG, with aria-label set to the title (rule V8)."""
+
+    def fig(key: str, title: str) -> Markup:
+        label = escape(title)
+        body, n = re.subn(r'aria-label="[^"]*"', f'aria-label="{label}"', str(figs.figs[key]), count=1)
+        if not n:
+            raise ValueError(f"figure {key} has no aria-label")
+        return Markup(f'<p class="title">{label}</p>{body}')
+
+    return fig
+
+
 def render_pages(env: Environment, figs: figures.Figures, css: str, js: str) -> None:
     tpl = env.get_template("index.html.j2")
     pages = [(DIST / "index.html", Meta("Garbage in, guilt out.", "Garbage in, guilt out.", f"{SITE}/", "site"))]
@@ -73,7 +87,7 @@ def render_pages(env: Environment, figs: figures.Figures, css: str, js: str) -> 
         out.parent.mkdir(parents=True, exist_ok=True)
         html = tpl.render(
             meta=meta, site=SITE, css=css, js=js, figs=figs.figs, tables=figs.tables,
-            n=Notes(), shares=SHARES, share_icon=SHARE_ICON,
+            n=Notes(), shares=SHARES, share_icon=SHARE_ICON, fig=titled(figs),
         )
         out.write_text(html)
 
@@ -82,7 +96,7 @@ def render_og(env: Environment, figs: figures.Figures) -> None:
     css = (ROOT / "static/style.css").read_text()
     tpl = env.get_template("og.html.j2")
     cards = [(s.slug, s.num, s.line, figs.figs[s.fig], 150, 400) for s in SHARES]
-    cards.append(("site", "Garbage in, guilt out.", "", figs.figs["c3"], 112, 400))
+    cards.append(("site", "Garbage in,<br>guilt out.", "", figs.figs["c3"], 92, 380))
     out_dir = DIST / "og"
     out_dir.mkdir(exist_ok=True)
     with sync_playwright() as p:

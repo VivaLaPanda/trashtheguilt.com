@@ -48,7 +48,7 @@ def ranges(rows: list[Row], aria: str, ticks: list[float], tick_fmt: str = "{:,.
     row_h, bar_t, top = 34, 14, 6
     x0, x1 = label_w, W - 70
     vmax = ticks[-1]
-    sx = lambda v: x0 + (x1 - x0) * v / vmax  # noqa: E731
+    sx = lambda v: x0 + (x1 - x0) * v / vmax
     plot_h = top + row_h * len(rows)
     parts: list[str] = []
     for t in ticks:
@@ -89,7 +89,7 @@ def waterfall(steps: list[Step], aria: str, ymax: float, ticks: list[float]) -> 
     x0 = 34
     col_w = 30
     slot = (W - x0) / len(steps)
-    sy = lambda v: base - (base - top) * v / ymax  # noqa: E731
+    sy = lambda v: base - (base - top) * v / ymax
     parts: list[str] = []
     for t in ticks:
         parts.append(line(x0, sy(t), W, sy(t), "grid" if t else "base"))
