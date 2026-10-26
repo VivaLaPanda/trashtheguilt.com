@@ -317,8 +317,10 @@
 
 <footer>
 <div class="wrap"><div>
-  <h2>Sources</h2>
-  {{ n.all() }}
+  <details class="all-sources">
+    <summary><h2>All {{ n.document_count }} sources</h2></summary>
+    {{ n.all() }}
+  </details>
   <h2>Methods</h2>
   <ol>
     <li><a href="#ocean-methods">Ocean</a></li>

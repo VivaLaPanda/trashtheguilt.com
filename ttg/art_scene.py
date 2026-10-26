@@ -1,5 +1,6 @@
 """Knockout scene: a sunrise city with clean power, new housing going up, and a garbage truck at work."""
 
+import math
 from dataclasses import dataclass
 
 from ttg.svg import circle, el, line, path, r, rect
@@ -14,7 +15,7 @@ FLOOR = 21  # storey height
 GROUND = 26  # ground-floor (shop) height
 
 SUN = (300, 186, 74)
-HALO = 108
+HALO = 118
 
 
 @dataclass(frozen=True)
@@ -51,8 +52,8 @@ def scene() -> tuple[str, float, float]:
         _trees(),
         _bins(),
         _birds(),
-        _place(_walker("f-peach"), 404, CURB - 3, 1.0),
-        _place(_cyclist(), 150, LANE - 3, 1.0),
+        _place(_walker("f-aqua"), 412, CURB - 3, 1.0),
+        _place(_cyclist(), 66, LANE - 3, 1.0),
         _place(_truck(), 436, WHEEL_Y, 1.12),
     ]
     return "".join(parts), W, H
@@ -96,12 +97,31 @@ def _sky() -> str:
     return "".join(
         [
             circle(cx, cy, HALO, "f-cream"),
+            _rays(cx, cy, rad + 9, HALO - 10),
             circle(cx, cy, rad, "s f-sun"),
             _cloud(26, 58, 0.66),
             _cloud(540, 62, 1.1),
             _cloud(690, 96, 0.72),
         ]
     )
+
+
+def _rays(cx: float, cy: float, r0: float, r1: float) -> str:
+    """Short tapered rays in the upper half of the halo, with a gap behind the crane's load."""
+    out = []
+    for k in range(13):
+        deg = 186 + k * 14
+        if 222 < deg < 246:
+            continue
+        a = math.radians(deg)
+        da = math.radians(3.2)
+        pts = [
+            (cx + r0 * math.cos(a - da), cy + r0 * math.sin(a - da)),
+            (cx + r1 * math.cos(a), cy + r1 * math.sin(a)),
+            (cx + r0 * math.cos(a + da), cy + r0 * math.sin(a + da)),
+        ]
+        out.append(_poly(pts, "s thin f-sun"))
+    return "".join(out)
 
 
 def _hills() -> str:
@@ -171,6 +191,7 @@ def _construction() -> str:
     for k in range(2):
         out.append(rect(x - 2, frame_top + k * FLOOR - 3, w + 4, 6, "s f-wood"))
     out.append(path(f"M{x + 20},{frame_top + FLOOR + 4}L{x + 54},{done_top - 1}M{x + 54},{frame_top + FLOOR + 4}L{x + 20},{done_top - 1}", "s thin ln"))
+    out.append(_place(_walker("f-aqua", step=False), x + 96, frame_top - 3, 0.8))
     return "".join(out)
 
 
@@ -192,7 +213,9 @@ def _crane() -> str:
     zz = "".join(f"L{r(left + 6 + k * 10)},{r(jib_y + (9 if k % 2 else 0))}" for k in range(int((right - left - 12) / 10) + 1))
     out.append(path(f"M{left + 6},{jib_y}{zz}", "s thin ln"))
     out.append(rect(392, jib_y + 9, 24, 14, "s f-metal"))
-    out.append(rect(mx + mw, jib_y + 9, 14, 13, "s f-paper", rx=2))
+    out.append(path(f"M400,{jib_y + 9}V{jib_y + 23}M408,{jib_y + 9}V{jib_y + 23}", "s thin ln"))
+    out.append(rect(mx + mw, jib_y + 9, 15, 14, "s f-paper", rx=2))
+    out.append(rect(mx + mw + 5, jib_y + 12, 7, 6, "s thin f-water", rx=1))
     # trolley, hoist line, load
     tx = 250
     out.append(rect(tx - 6, jib_y + 9, 12, 5, "s f-ink"))
@@ -212,6 +235,9 @@ def _block(b: Block) -> str:
         for i in range(b.floors):
             y = top + 6 + i * FLOOR + 10
             out.append(rect(b.x + 6, y, b.w - 12, 5, "s thin f-paper"))
+            if i % 2 == 0:
+                px = b.x + 14 + ((i * 29) % int(b.w - 28))
+                out.append(circle(px, y - 3, 3.5, "s thin f-grass") + circle(px + 6, y - 2.5, 3, "s thin f-peach"))
     out.append(_shopfront(b))
     out.append(_roof(b, top - 5))
     return "".join(out)
@@ -324,6 +350,9 @@ def _truck() -> str:
         path(f"M168,{top + 20}H180L191,{top + 34}H168Z", "s thin f-water"),
         rect(152, top + 20, 12, 14, "s thin f-water"),
         rect(160, top + 8, 10, 6, "s f-sun", rx=3),
+        rect(194, frame - 14, 6, 6, "s thin f-sun", rx=1.5),
+        rect(190, frame + 1, 14, 7, "s f-metal", rx=2),
+        path(f"M196,{top + 22}H201V{top + 34}", "s ln"),
         rect(-8, frame + 2, 16, 4, "s f-ink"),
     ]
     for cx in (42, 70, 172):

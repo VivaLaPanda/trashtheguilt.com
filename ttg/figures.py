@@ -1,7 +1,6 @@
 """Assemble every figure on the page from the numbers module."""
 
 import csv
-import importlib.util
 import math
 from dataclasses import dataclass
 from html import escape
@@ -9,7 +8,7 @@ from pathlib import Path
 
 from markupsafe import Markup
 
-from ttg import art_bed, art_landfill, art_objects
+from ttg import art_bed, art_landfill, art_objects, art_scene
 from ttg.charts import Flow, Row, Step, hbars, ranges, sankey, waterfall
 from ttg.numbers import BIN, CLIMATE, LANDFILL, OCEAN, Country
 from ttg.svg import circle, el, path, r, rect, svg, text
@@ -223,12 +222,7 @@ def can() -> str:
     return svg(48, 68, art_objects.can(), "An aluminum can", cls="fig can")
 
 
-def scene() -> str | None:
-    """The knockout scene, once its module exists."""
-    if importlib.util.find_spec("ttg.art_scene") is None:
-        return None
-    from ttg import art_scene  # optional module
-
+def scene() -> str:
     body, w, h = art_scene.scene()
     return svg(w, h, body, "A sunrise city with wind turbines, solar roofs, new apartments going up and a garbage truck at work")
 

@@ -117,6 +117,10 @@ class Notes:
         items = "".join(self._item(k, f"{self.section}-n{self.order.index(k) + 1}") for k in keys)
         return Markup(f'<div class="sources"><h3>Sources</h3><ol>{items}</ol></div>')
 
+    @property
+    def document_count(self) -> int:
+        return sum(1 for k in self.order if not k.startswith("calc"))
+
     def all(self) -> Markup:
         items = "".join(self._item(k, f"src-{i + 1}") for i, k in enumerate(self.order))
         return Markup(f"<ol>{items}</ol>")
